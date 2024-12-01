@@ -28,3 +28,6 @@ pico-args = "0.5.0"
 tinyjson = "2.5.1"
 
 # Solution dependencies
+itertools = { version = "0.13.0", features = [] }
+regex = { version = "1.11.1", features = [] }
+anyhow = { version = "1.0.93", features = [] }
