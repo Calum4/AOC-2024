@@ -7,7 +7,37 @@ advent_of_code::solution!(1);
 // liberal use of `.unwrap()`.
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let (mut left, mut right): (Vec<u32>, Vec<u32>) = input
+    let (mut left, mut right) = unzip_lines(input);
+
+    left.sort_unstable();
+    right.sort_unstable();
+
+    let result = left
+        .iter()
+        .zip(right)
+        .map(|(left, right)| left.abs_diff(right))
+        .sum::<u32>();
+
+    Some(result)
+}
+
+pub fn part_two(input: &str) -> Option<u32> {
+    let (left, right) = unzip_lines(input);
+
+    let popularity = right.into_iter().counts();
+
+    let result = left
+        .iter()
+        .map(|location_id| {
+            location_id * u32::try_from(*popularity.get(location_id).unwrap_or(&0usize)).unwrap()
+        })
+        .sum::<u32>();
+
+    Some(result)
+}
+
+fn unzip_lines(input: &str) -> (Vec<u32>, Vec<u32>) {
+    input
         .lines()
         .map(|line| {
             line.split_ascii_whitespace()
@@ -15,22 +45,7 @@ pub fn part_one(input: &str) -> Option<u32> {
                 .unwrap()
         })
         .map(|(left, right)| (u32::from_str(left).unwrap(), u32::from_str(right).unwrap()))
-        .unzip();
-
-    left.sort_unstable();
-    right.sort_unstable();
-
-    let result = left
-        .iter()
-        .zip(right.iter())
-        .map(|(left, right)| left.abs_diff(*right))
-        .sum::<u32>();
-
-    Some(result)
-}
-
-pub fn part_two(input: &str) -> Option<u32> {
-    None
+        .unzip()
 }
 
 #[cfg(test)]
