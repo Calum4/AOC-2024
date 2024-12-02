@@ -11,7 +11,7 @@ pub fn part_one(input: &str) -> Option<u32> {
                 .map(|level| u8::from_str(level).unwrap())
                 .collect_vec()
         })
-        .filter(|report| check_safe(report))
+        .filter(|report| check_safe(report.iter()))
         .count();
 
     Some(u32::try_from(result).unwrap())
@@ -26,21 +26,22 @@ pub fn part_two(input: &str) -> Option<u32> {
                 .collect_vec()
         })
         .filter(|report| {
-            if check_safe(report) {
+            if check_safe(report.iter()) {
                 return true;
             }
-            
-            let mut report_clone: Vec<u8> = Vec::with_capacity(report.len());
-            
+
             for i in 0..report.len() {
-                report_clone.clone_from(report);
-                report_clone.remove(i);
-                
-                if check_safe(&report_clone) {
+                let report_iter = report
+                    .iter()
+                    .enumerate()
+                    .filter(|(index, _)| *index != i)
+                    .map(|(_, report)| report);
+
+                if check_safe(report_iter) {
                     return true;
                 }
             }
-            
+
             false
         })
         .count();
@@ -48,10 +49,12 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(u32::try_from(result).unwrap())
 }
 
-fn check_safe(report: &[u8]) -> bool {
+fn check_safe<'a, I>(mut level_iter: I) -> bool
+where
+    I: Iterator<Item = &'a u8>,
+{
     let mut is_increasing: Option<bool> = None;
     let mut previous_value: Option<u8> = None;
-    let mut level_iter = report.iter();
 
     loop {
         let prev = match previous_value {
