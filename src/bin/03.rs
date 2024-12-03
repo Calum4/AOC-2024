@@ -1,11 +1,18 @@
-use regex::Regex;
 use std::str::FromStr;
-use std::sync::LazyLock;
 
 advent_of_code::solution!(3);
 
-static MUL_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"mul\(\d+,\d+\)").unwrap());
-static PARAM_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\d+").unwrap());
+/*
+    # Performance Optimisation 
+    
+    ## Original
+    Part 1: 184122457 (129.5µs @ 1394 samples)
+    Part 2: 107862689 (83.3µs @ 9140 samples)
+    
+    ## Replaced regex with `core::str::split()` in `self::calculate_mul()`
+    Part 1: 184122457 (56.6µs @ 10000 samples)
+    Part 2: 107862689 (43.5µs @ 10000 samples)
+*/
 
 pub fn part_one(input: &str) -> Option<u32> {
     Some(calculate_mul(input))
@@ -31,14 +38,17 @@ pub fn part_two(input: &str) -> Option<u32> {
 }
 
 fn calculate_mul(input: &str) -> u32 {
-    MUL_REGEX
-        .find_iter(input)
-        .map(|m| {
-            PARAM_REGEX
-                .find_iter(m.as_str())
-                .map(|m2| u32::from_str(m2.as_str()).unwrap())
-                .reduce(|acc, e| acc * e)
-                .unwrap()
+    input
+        .split("mul(")
+        .map(|start| {
+            let Some(param_str) = start.split(")").next() else {
+                return 0;
+            };
+
+            param_str
+                .split(",")
+                .map(|param| u32::from_str(param).unwrap_or(0))
+                .product::<u32>()
         })
         .sum()
 }
