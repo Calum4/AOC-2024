@@ -3,15 +3,20 @@ use std::str::FromStr;
 advent_of_code::solution!(3);
 
 /*
-    # Performance Optimisation 
-    
+    # Performance Optimisation
+
     ## Original
     Part 1: 184122457 (129.5µs @ 1394 samples)
     Part 2: 107862689 (83.3µs @ 9140 samples)
-    
+
     ## Replaced regex with `core::str::split()` in `self::calculate_mul()`
     Part 1: 184122457 (56.6µs @ 10000 samples)
     Part 2: 107862689 (43.5µs @ 10000 samples)
+
+    ## Remove string concatenation
+    Part 1: 184122457 (52.7µs @ 10000 samples)
+    Part 2: 107862689 (41.5µs @ 10000 samples)
+
 */
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -19,22 +24,21 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let split_iter = input.split("don't()");
+    let mut total = 0u32;
+    let mut split_iter = input.split("don't()");
 
-    let mut safe_string = String::with_capacity(input.len());
+    if let Some(str) = split_iter.next() {
+        total += calculate_mul(str);
+    }
 
-    split_iter.enumerate().for_each(|(index, str)| {
-        if index == 0 {
-            safe_string += str;
-        } else {
-            let mut str_iter = str.split("do()");
-            str_iter.next();
+    split_iter.for_each(|str| {
+        let mut str_iter = str.split("do()");
+        str_iter.next();
 
-            str_iter.for_each(|str| safe_string += str);
-        }
+        total += str_iter.map(calculate_mul).sum::<u32>();
     });
 
-    Some(calculate_mul(safe_string.as_str()))
+    Some(total)
 }
 
 fn calculate_mul(input: &str) -> u32 {
