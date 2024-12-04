@@ -31,3 +31,5 @@ tinyjson = "2.5.1"
 itertools = { version = "0.13.0", features = [] }
 regex = { version = "1.11.1", features = [] }
 anyhow = { version = "1.0.93", features = [] }
+strum = { version = "0.26.3", features = ["derive"] }
+num-traits = { version = "0.2.19", features = [] }
