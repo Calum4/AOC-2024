@@ -17,7 +17,10 @@ pub fn part_one(input: &str) -> Option<u32> {
                 .map(|page_number| u8::from_str(page_number).unwrap())
         })
         .for_each(|page_numbers_iter| {
-            if !page_numbers_iter.clone().is_sorted_by(|a, b| page_ordering[*a as usize][*b as usize]) {
+            if !page_numbers_iter
+                .clone()
+                .is_sorted_by(|a, b| page_ordering[*a as usize][*b as usize])
+            {
                 return;
             }
 
@@ -41,16 +44,21 @@ pub fn part_two(input: &str) -> Option<u32> {
                 .map(|page_number| u8::from_str(page_number).unwrap())
         })
         .for_each(|page_numbers_iter| {
-            if page_numbers_iter.clone().is_sorted_by(|a, b| page_ordering[*a as usize][*b as usize]) {
+            if page_numbers_iter
+                .clone()
+                .is_sorted_by(|a, b| page_ordering[*a as usize][*b as usize])
+            {
                 return;
             }
 
-            let page_numbers = page_numbers_iter.sorted_by(|a: &u8, b: &u8| -> Ordering {
-                match page_ordering[*a as usize][*b as usize] {
-                    true => Ordering::Greater,
-                    false => Ordering::Less,
-                }
-            }).collect_vec();
+            let page_numbers = page_numbers_iter
+                .sorted_by(|a: &u8, b: &u8| -> Ordering {
+                    match page_ordering[*a as usize][*b as usize] {
+                        true => Ordering::Greater,
+                        false => Ordering::Less,
+                    }
+                })
+                .collect_vec();
 
             middle_page_number_sum += page_numbers[(page_numbers.len() - 1) / 2] as u32;
         });
@@ -62,11 +70,13 @@ fn setup_ordering(page_ordering_str: &str) -> [[bool; 100]; 100] {
     let mut page_ordering = [[false; 100]; 100];
 
     page_ordering_str
-        .lines()
-        .map(|line| line.split('|'))
-        .filter_map(|mut a| {
-            let left = a.next()?;
-            let right = a.next()?;
+        .as_bytes()
+        .split(|byte| *byte == b'\n')
+        .filter_map(|line| {
+            let mut line_iter = line.split(|byte| *byte == b'|');
+
+            let left = std::str::from_utf8(line_iter.next()?).ok()?;
+            let right = std::str::from_utf8(line_iter.next()?).ok()?;
 
             #[inline]
             fn convert(str: &str) -> usize {
