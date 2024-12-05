@@ -13,8 +13,6 @@ macro_rules! is_odd {
     )*}
 }
 
-
-
 is_odd!(u8, u16, u32, u64, u128, usize);
 is_odd!(i8, i16, i32, i64, i128, isize);
 
