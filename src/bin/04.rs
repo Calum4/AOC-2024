@@ -3,6 +3,19 @@ use strum::EnumIter;
 
 advent_of_code::solution!(4);
 
+/*
+    # Performance Optimisation
+
+    ## Original
+    Part 1: 2454 (255.8µs @ 2816 samples)
+    Part 2: 1858 (35.9µs @ 10000 samples)
+
+    ## Migrated from using chars (4 bytes) to u8
+    Part 1: 2454 (244.6µs @ 3756 samples)
+    Part 2: 1858 (24.3µs @ 10000 samples)
+
+*/
+
 const MAX_X_LENGTH: usize = if !cfg!(test) { 140 } else { 10 };
 const MAX_Y_LENGTH: usize = if !cfg!(test) { 140 } else { 10 };
 
@@ -64,7 +77,7 @@ mod part_1 {
     use std::iter::Iterator;
     use strum::IntoEnumIterator;
 
-    pub(super) const WORD_STR: &str = "XMAS";
+    pub(super) const WORD_STR: &[u8] = b"XMAS";
 
     #[derive(Copy, Clone, Debug)]
     pub(super) struct PotentialWord {
@@ -114,23 +127,21 @@ mod part_1 {
             Direction::iter().filter_map(move |direction| Self::try_new(origin, direction))
         }
 
-        pub(super) fn is_valid(&self, input: &[[char; MAX_X_LENGTH]; MAX_Y_LENGTH]) -> bool {
+        pub(super) fn is_valid(&self, input: &[[u8; MAX_X_LENGTH]; MAX_Y_LENGTH]) -> bool {
             let mut position = self.origin;
 
-            let word_iter = WORD_STR
-                .chars()
-                .map(|char| char.to_ascii_uppercase())
-                .enumerate()
-                .map(|(word_index, char)| (word_index == WORD_STR.len() - 1, char));
+            let bytes = WORD_STR
+                .iter()
+                .enumerate();
 
             let mut is_valid = false;
 
-            for (is_last, char) in word_iter {
-                if input[position.y][position.x] != char {
+            for (index, byte) in bytes {
+                if input[position.y][position.x] != *byte {
                     break;
                 }
 
-                if is_last {
+                if index == WORD_STR.len() - 1 {
                     is_valid = true;
                     break;
                 } else {
@@ -151,7 +162,7 @@ pub fn part_one(input_str: &str) -> Option<u32> {
 
     for (y_index, line) in input.iter().enumerate() {
         for (x_index, char) in line.iter().enumerate() {
-            if *char != 'X' {
+            if *char != b'X' {
                 continue;
             }
 
@@ -172,7 +183,7 @@ mod part_2 {
     use super::*;
 
     // `.len()` should be odd
-    const WORD_STR: &str = "MAS";
+    const WORD_STR: &[u8] = b"MAS";
     // noinspection RsAssertEqual - `assert_ne!()` is not const
     const _: () = {
         assert!((WORD_STR.len() & 1) != 0);
@@ -199,7 +210,7 @@ mod part_2 {
             }
         }
 
-        pub(super) fn is_valid(&self, input: &[[char; MAX_X_LENGTH]; MAX_Y_LENGTH]) -> bool {
+        pub(super) fn is_valid(&self, input: &[[u8; MAX_X_LENGTH]; MAX_Y_LENGTH]) -> bool {
             let get_char = |direction: Direction| {
                 let position = self.origin.unchecked_increment(direction, OFFSET);
                 input[position.y][position.x]
@@ -207,13 +218,13 @@ mod part_2 {
 
             let nw = get_char(Direction::NorthWest);
             let se = get_char(Direction::SouthEast);
-            if !matches!([nw, se], ['M', 'S'] | ['S', 'M']) {
+            if !matches!(&[nw, se], b"MS" | b"SM") {
                 return false;
             }
 
             let ne = get_char(Direction::NorthEast);
             let sw = get_char(Direction::SouthWest);
-            matches!([ne, sw], ['M', 'S'] | ['S', 'M'])
+            matches!(&[ne, sw], b"MS" | b"SM")
         }
     }
 }
@@ -224,9 +235,9 @@ pub fn part_two(input_str: &str) -> Option<u32> {
     let input = construct_input_array(input_str);
     let mut occurances = 0u32;
 
-    for (y_index, line) in input.iter().enumerate() {
-        for (x_index, char) in line.iter().enumerate() {
-            if *char != 'A' {
+    for (y_index, line) in input.into_iter().enumerate() {
+        for (x_index, byte) in line.into_iter().enumerate() {
+            if byte != b'A' {
                 continue;
             }
 
@@ -244,17 +255,16 @@ pub fn part_two(input_str: &str) -> Option<u32> {
     Some(occurances)
 }
 
-fn construct_input_array(input: &str) -> [[char; MAX_X_LENGTH]; MAX_Y_LENGTH] {
-    let mut chars = [[char::default(); MAX_X_LENGTH]; MAX_Y_LENGTH];
-
-    // TODO - Swap to bytes instead of chars?
+fn construct_input_array(input: &str) -> [[u8; MAX_X_LENGTH]; MAX_Y_LENGTH] {
+    let mut bytes = [[u8::default(); MAX_X_LENGTH]; MAX_Y_LENGTH];
+    
     input.lines().enumerate().for_each(|(y_index, line)| {
-        line.chars().enumerate().for_each(|(x_index, char)| {
-            chars[y_index][x_index] = char.to_ascii_uppercase();
+        line.as_bytes().iter().enumerate().for_each(|(x_index, byte)| {
+            bytes[y_index][x_index] = *byte;
         });
     });
 
-    chars
+    bytes
 }
 
 #[cfg(test)]
