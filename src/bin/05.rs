@@ -15,12 +15,14 @@ pub fn part_one(input: &str) -> Option<u32> {
         .map(|line| {
             line.split(',')
                 .map(|page_number| u8::from_str(page_number).unwrap())
-                .collect_vec()
         })
-        .for_each(|page_numbers| {
-            if page_numbers.is_sorted_by(|a, b| page_ordering[*a as usize][*b as usize]) {
-                middle_page_number_sum += page_numbers[(page_numbers.len() - 1) / 2] as u32;
+        .for_each(|page_numbers_iter| {
+            if !page_numbers_iter.clone().is_sorted_by(|a, b| page_ordering[*a as usize][*b as usize]) {
+                return;
             }
+
+            let page_numbers = page_numbers_iter.collect_vec();
+            middle_page_number_sum += page_numbers[(page_numbers.len() - 1) / 2] as u32;
         });
 
     Some(middle_page_number_sum)
@@ -37,19 +39,18 @@ pub fn part_two(input: &str) -> Option<u32> {
         .map(|line| {
             line.split(',')
                 .map(|page_number| u8::from_str(page_number).unwrap())
-                .collect_vec()
         })
-        .for_each(|mut page_numbers| {
-            if page_numbers.is_sorted_by(|a, b| page_ordering[*a as usize][*b as usize]) {
+        .for_each(|page_numbers_iter| {
+            if page_numbers_iter.clone().is_sorted_by(|a, b| page_ordering[*a as usize][*b as usize]) {
                 return;
             }
 
-            page_numbers.sort_by(|a: &u8, b: &u8| -> Ordering {
+            let page_numbers = page_numbers_iter.sorted_by(|a: &u8, b: &u8| -> Ordering {
                 match page_ordering[*a as usize][*b as usize] {
                     true => Ordering::Greater,
                     false => Ordering::Less,
                 }
-            });
+            }).collect_vec();
 
             middle_page_number_sum += page_numbers[(page_numbers.len() - 1) / 2] as u32;
         });
