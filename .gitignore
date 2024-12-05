@@ -28,3 +28,6 @@ dhat-heap.json
 # Benchmarks
 
 data/timings.json
+
+# Ignore files with `.ignore` appended
+*.ignore
