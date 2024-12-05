@@ -6,25 +6,7 @@ advent_of_code::solution!(5);
 
 pub fn part_one(input: &str) -> Option<u32> {
     let (page_ordering_str, page_numbers_str) = input.split_once("\n\n").unwrap();
-    let mut page_ordering = [[false; 100]; 100];
-
-    page_ordering_str
-        .lines()
-        .map(|line| line.split('|'))
-        .filter_map(|mut a| {
-            let left = a.next()?;
-            let right = a.next()?;
-
-            #[inline]
-            fn convert(str: &str) -> usize {
-                usize::from_str(str).unwrap()
-            }
-
-            Some((convert(left), convert(right)))
-        })
-        .for_each(|(left, right)| {
-            page_ordering[left][right] = true;
-        });
+    let page_ordering = setup_ordering(page_ordering_str);
 
     let mut middle_page_number_sum: u32 = 0;
 
@@ -65,25 +47,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 
 pub fn part_two(input: &str) -> Option<u32> {
     let (page_ordering_str, page_numbers_str) = input.split_once("\n\n").unwrap();
-    let mut page_ordering = [[false; 100]; 100];
-
-    page_ordering_str
-        .lines()
-        .map(|line| line.split('|'))
-        .filter_map(|mut a| {
-            let left = a.next()?;
-            let right = a.next()?;
-
-            #[inline]
-            fn convert(str: &str) -> usize {
-                usize::from_str(str).unwrap()
-            }
-
-            Some((convert(left), convert(right)))
-        })
-        .for_each(|(left, right)| {
-            page_ordering[left][right] = true;
-        });
+    let page_ordering = setup_ordering(page_ordering_str);
 
     let mut middle_page_number_sum: u32 = 0;
 
@@ -110,6 +74,30 @@ pub fn part_two(input: &str) -> Option<u32> {
         });
 
     Some(middle_page_number_sum)
+}
+
+fn setup_ordering(page_ordering_str: &str) -> [[bool; 100]; 100] {
+    let mut page_ordering = [[false; 100]; 100];
+
+    page_ordering_str
+        .lines()
+        .map(|line| line.split('|'))
+        .filter_map(|mut a| {
+            let left = a.next()?;
+            let right = a.next()?;
+
+            #[inline]
+            fn convert(str: &str) -> usize {
+                usize::from_str(str).unwrap()
+            }
+
+            Some((convert(left), convert(right)))
+        })
+        .for_each(|(left, right)| {
+            page_ordering[left][right] = true;
+        });
+    
+    page_ordering
 }
 
 #[cfg(test)]
