@@ -130,9 +130,7 @@ mod part_1 {
         pub(super) fn is_valid(&self, input: &[[u8; MAX_X_LENGTH]; MAX_Y_LENGTH]) -> bool {
             let mut position = self.origin;
 
-            let bytes = WORD_STR
-                .iter()
-                .enumerate();
+            let bytes = WORD_STR.iter().enumerate();
 
             let mut is_valid = false;
 
@@ -257,11 +255,14 @@ pub fn part_two(input_str: &str) -> Option<u32> {
 
 fn construct_input_array(input: &str) -> [[u8; MAX_X_LENGTH]; MAX_Y_LENGTH] {
     let mut bytes = [[u8::default(); MAX_X_LENGTH]; MAX_Y_LENGTH];
-    
+
     input.lines().enumerate().for_each(|(y_index, line)| {
-        line.as_bytes().iter().enumerate().for_each(|(x_index, byte)| {
-            bytes[y_index][x_index] = *byte;
-        });
+        line.as_bytes()
+            .iter()
+            .enumerate()
+            .for_each(|(x_index, byte)| {
+                bytes[y_index][x_index] = *byte;
+            });
     });
 
     bytes
