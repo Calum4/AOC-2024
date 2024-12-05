@@ -18,26 +18,7 @@ pub fn part_one(input: &str) -> Option<u32> {
                 .collect_vec()
         })
         .for_each(|page_numbers| {
-            let mut is_ordered = true;
-
-            if page_numbers.len() > 1 && (page_numbers.len() & 1) != 0 {
-                let mut page_numbers_iter = page_numbers.iter();
-                let mut previous = page_numbers_iter.next().unwrap();
-
-                for next in page_numbers_iter {
-                    if page_ordering[*previous as usize][*next as usize] {
-                        previous = next;
-                        continue;
-                    }
-
-                    is_ordered = false;
-                    break;
-                }
-            } else {
-                is_ordered = false;
-            }
-
-            if is_ordered {
+            if page_numbers.is_sorted_by(|a, b| page_ordering[*a as usize][*b as usize]) {
                 middle_page_number_sum += page_numbers[(page_numbers.len() - 1) / 2] as u32;
             }
         });
@@ -96,7 +77,7 @@ fn setup_ordering(page_ordering_str: &str) -> [[bool; 100]; 100] {
         .for_each(|(left, right)| {
             page_ordering[left][right] = true;
         });
-    
+
     page_ordering
 }
 
