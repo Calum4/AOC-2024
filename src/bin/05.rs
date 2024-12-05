@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::cmp::Ordering;
 use std::str::FromStr;
 
 advent_of_code::solution!(5);
@@ -63,7 +64,52 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let (page_ordering_str, page_numbers_str) = input.split_once("\n\n").unwrap();
+    let mut page_ordering = [[false; 100]; 100];
+
+    page_ordering_str
+        .lines()
+        .map(|line| line.split('|'))
+        .filter_map(|mut a| {
+            let left = a.next()?;
+            let right = a.next()?;
+
+            #[inline]
+            fn convert(str: &str) -> usize {
+                usize::from_str(str).unwrap()
+            }
+
+            Some((convert(left), convert(right)))
+        })
+        .for_each(|(left, right)| {
+            page_ordering[left][right] = true;
+        });
+
+    let mut middle_page_number_sum: u32 = 0;
+
+    page_numbers_str
+        .lines()
+        .map(|line| {
+            line.split(',')
+                .map(|page_number| u8::from_str(page_number).unwrap())
+                .collect_vec()
+        })
+        .for_each(|mut page_numbers| {
+            if page_numbers.is_sorted_by(|a, b| page_ordering[*a as usize][*b as usize]) {
+                return;
+            }
+
+            page_numbers.sort_by(|a: &u8, b: &u8| -> Ordering {
+                match page_ordering[*a as usize][*b as usize] {
+                    true => Ordering::Greater,
+                    false => Ordering::Less,
+                }
+            });
+
+            middle_page_number_sum += page_numbers[(page_numbers.len() - 1) / 2] as u32;
+        });
+
+    Some(middle_page_number_sum)
 }
 
 #[cfg(test)]
@@ -79,6 +125,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(123));
     }
 }
