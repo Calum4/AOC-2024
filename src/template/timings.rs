@@ -285,7 +285,7 @@ mod tests {
                 }],
             };
 
-            assert_eq!(timings.is_day_complete(&day!(1)), true);
+            assert!(timings.is_day_complete(day!(1)));
         }
 
         #[test]
@@ -298,8 +298,8 @@ mod tests {
                     total_nanos: 1_000_000_000_f64,
                 }],
             };
-
-            assert_eq!(timings.is_day_complete(&day!(1)), false);
+            
+            assert!(!timings.is_day_complete(day!(1)));
         }
 
         #[test]
@@ -313,7 +313,7 @@ mod tests {
                 }],
             };
 
-            assert_eq!(timings.is_day_complete(&day!(1)), false);
+            assert!(!timings.is_day_complete(day!(1)));
         }
     }
 
