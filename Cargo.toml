@@ -28,8 +28,8 @@ pico-args = "0.5.0"
 tinyjson = "2.5.1"
 
 # Solution dependencies
-itertools = { version = "0.13.0", features = [] }
+itertools = { version = "0.14.0", features = [] }
 regex = { version = "1.11.1", features = [] }
 anyhow = { version = "1.0.93", features = [] }
-strum = { version = "0.26.3", features = ["derive"] }
+strum = { version = "0.27.1", features = ["derive"] }
 num-traits = { version = "0.2.19", features = [] }
