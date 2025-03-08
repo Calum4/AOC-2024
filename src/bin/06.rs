@@ -1,4 +1,7 @@
 use std::cmp::PartialEq;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU32, Ordering};
+use std::thread;
 
 advent_of_code::solution!(6);
 
@@ -207,35 +210,45 @@ pub fn part_two(input: &str) -> Option<u32> {
         });
     });
 
-    let mut loops = 0_u32;
+    let loops = Arc::new(AtomicU32::new(0));
+    let mut handles = Vec::with_capacity(MAX_Y_LENGTH * MAX_X_LENGTH);
 
     for y in 0..MAX_Y_LENGTH {
-        for x in 0..MAX_X_LENGTH {
-            let mut current_position = start_position.unwrap();
+        let obstacles = obstacles.clone();
+        let loops = loops.clone();
+        
+        handles.push(thread::spawn(move || {
+            for x in 0..MAX_X_LENGTH {
+                let mut current_position = start_position.unwrap();
 
-            if (y == current_position.y && x == current_position.x) || obstacles[y][x].is_some() {
-                continue;
-            }
+                if (y == current_position.y && x == current_position.x) || obstacles[y][x].is_some() {
+                    continue;
+                }
 
-            let mut obstacles = {
-                let mut obstacles = obstacles.clone();
-                obstacles[y][x] = Some(Obstacle::new());
+                let mut obstacles = {
+                    let mut obstacles = obstacles.clone();
+                    obstacles[y][x] = Some(Obstacle::new());
 
-                obstacles
-            };
+                    obstacles
+                };
 
-            while let Some((position, is_loop)) = current_position.advance_pt2(&mut obstacles) {
-                current_position = position;
+                while let Some((position, is_loop)) = current_position.advance_pt2(&mut obstacles) {
+                    current_position = position;
 
-                if is_loop {
-                    loops += 1;
-                    break;
+                    if is_loop {
+                        loops.fetch_add(1, Ordering::Relaxed);
+                        break;
+                    }
                 }
             }
-        }
+        }));
+    }
+    
+    for handle in handles {
+        handle.join().unwrap();
     }
 
-    Some(loops)
+    Some(loops.load(Ordering::Acquire))
 }
 
 #[cfg(test)]
