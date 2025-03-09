@@ -1,7 +1,9 @@
 use std::cmp::PartialEq;
+use std::collections::HashSet;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::thread;
+use itertools::Itertools;
 
 advent_of_code::solution!(6);
 
@@ -198,27 +200,41 @@ impl Obstacle {
 
 pub fn part_two(input: &str) -> Option<u32> {
     let mut obstacles = vec![vec![None; MAX_X_LENGTH]; MAX_Y_LENGTH];
+    let mut obstacles2 = [[false; MAX_Y_LENGTH]; MAX_X_LENGTH];
     let mut start_position: Option<Position> = None;
 
     input.as_bytes().split(|byte| *byte == b'\n').enumerate().for_each(|(y_index, line)| {
         line.iter().enumerate().for_each(|(x_index, byte)| {
             if *byte == b'#' {
                 obstacles[y_index][x_index] = Some(Obstacle::new());
+                obstacles2[y_index][x_index] = true;
             } else if start_position.is_none() && *byte == b'^' {
                 start_position = Some(Position::new(x_index, y_index, Heading::North));
             }
         });
     });
 
+    let mut possible_positions = HashSet::new();
+    let mut current_position = start_position.unwrap();
+
+    while let Some((new_position, did_advance)) = current_position.advance(&obstacles2) {
+        current_position = new_position;
+
+        if did_advance {
+            possible_positions.insert((new_position.y, new_position.x));
+        }
+    }
+
     let loops = Arc::new(AtomicU32::new(0));
     let mut handles = Vec::with_capacity(MAX_Y_LENGTH * MAX_X_LENGTH);
 
-    for y in 0..MAX_Y_LENGTH {
+    for chunk in &possible_positions.into_iter().chunks(MAX_X_LENGTH) {
         let obstacles = obstacles.clone();
         let loops = loops.clone();
-        
+        let chunk = chunk.collect_vec();
+
         handles.push(thread::spawn(move || {
-            for x in 0..MAX_X_LENGTH {
+            for (y, x) in chunk {
                 let mut current_position = start_position.unwrap();
 
                 if (y == current_position.y && x == current_position.x) || obstacles[y][x].is_some() {
@@ -243,7 +259,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             }
         }));
     }
-    
+
     for handle in handles {
         handle.join().unwrap();
     }
