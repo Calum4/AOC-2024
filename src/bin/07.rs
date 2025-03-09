@@ -46,37 +46,28 @@ pub fn part_one(input: &str) -> Option<u64> {
 fn is_equation_valid_pt2((result, values): (u64, Vec<u64>)) -> Option<u64> {
     let num_ops = values.len() - 1;
 
-    let mut result_vec = vec![0; num_ops];
-
     for i in 0..3u32.pow(num_ops as u32) {
-        if i > 0 {
-            result_vec.fill(0);
-        }
-
+        let mut calculated_result = values[0];
         let mut value = i;
 
-        for result in result_vec.iter_mut().rev() {
-            if value == 0 {
-                break;
-            }
-
-            *result = (value % 3) as u8;
+        for j in 0..num_ops {
+            let op_code = value % 3;
             value /= 3;
-        }
 
-        let mut result_vec_iter = result_vec.iter();
-
-        let calculated_result = values.iter().copied().reduce(|acc, value| {
-            match result_vec_iter.next().unwrap() {
-                0 => acc + value,
-                1 => acc * value,
+            calculated_result = match op_code {
+                0 => calculated_result + values[j + 1],
+                1 => calculated_result * values[j + 1],
                 2 => {
-                    let concat = format!("{acc}{value}");
+                    let concat = format!("{calculated_result}{}", values[j + 1]);
                     concat.parse().unwrap()
                 }
-                _ => panic!("This should not be possible")
+                _ => unreachable!()
+            };
+            
+            if calculated_result > result {
+              break;  
             }
-        }).unwrap();
+        }
 
         if result == calculated_result {
             return Some(result)
