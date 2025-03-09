@@ -43,6 +43,22 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(sum)
 }
 
+fn num_digits(n: u64) -> u32 {
+    if n == 0 {
+        return 1;
+    }
+    
+    let mut count = 0;
+    let mut temp = n;
+    
+    while temp > 0 {
+        temp /= 10;
+        count += 1;
+    }
+    
+    count
+}
+
 fn is_equation_valid_pt2((result, values): (u64, Vec<u64>)) -> Option<u64> {
     let num_ops = values.len() - 1;
 
@@ -58,8 +74,8 @@ fn is_equation_valid_pt2((result, values): (u64, Vec<u64>)) -> Option<u64> {
                 0 => calculated_result + values[j + 1],
                 1 => calculated_result * values[j + 1],
                 2 => {
-                    let concat = format!("{calculated_result}{}", values[j + 1]);
-                    concat.parse().unwrap()
+                    let num_digits = num_digits(values[j + 1]);
+                    calculated_result * 10u64.pow(num_digits) + values[j + 1]
                 }
                 _ => unreachable!()
             };
