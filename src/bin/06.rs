@@ -1,9 +1,9 @@
+use itertools::Itertools;
 use std::cmp::PartialEq;
 use std::collections::HashSet;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::thread;
-use itertools::Itertools;
 
 advent_of_code::solution!(6);
 
@@ -38,11 +38,7 @@ struct Position {
 
 impl Position {
     fn new(x: usize, y: usize, heading: Heading) -> Self {
-        Self {
-            x,
-            y,
-            heading,
-        }
+        Self { x, y, heading }
     }
 
     fn advance(self, obstacles: &[[bool; MAX_Y_LENGTH]; MAX_X_LENGTH]) -> Option<(Self, bool)> {
@@ -64,7 +60,7 @@ impl Position {
                     y: self.y,
                     heading: self.heading.turn_clockwise_90(),
                 },
-                false
+                false,
             ))
         } else {
             Some((
@@ -73,7 +69,7 @@ impl Position {
                     y,
                     heading: self.heading,
                 },
-                true
+                true,
             ))
         }
     }
@@ -120,15 +116,19 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut obstacles = [[false; MAX_Y_LENGTH]; MAX_X_LENGTH];
     let mut start_position: Option<Position> = None;
 
-    input.as_bytes().split(|byte| *byte == b'\n').enumerate().for_each(|(y_index, line)| {
-        line.iter().enumerate().for_each(|(x_index, byte)| {
-            if *byte == b'#' {
-                obstacles[y_index][x_index] = true;
-            } else if start_position.is_none() && *byte == b'^' {
-                start_position = Some(Position::new(x_index, y_index, Heading::North));
-            }
+    input
+        .as_bytes()
+        .split(|byte| *byte == b'\n')
+        .enumerate()
+        .for_each(|(y_index, line)| {
+            line.iter().enumerate().for_each(|(x_index, byte)| {
+                if *byte == b'#' {
+                    obstacles[y_index][x_index] = true;
+                } else if start_position.is_none() && *byte == b'^' {
+                    start_position = Some(Position::new(x_index, y_index, Heading::North));
+                }
+            });
         });
-    });
 
     let mut current_position = start_position.unwrap();
     let mut visited_positions = [[false; MAX_Y_LENGTH]; MAX_X_LENGTH];
@@ -174,9 +174,7 @@ struct Obstacle {
 
 impl Obstacle {
     fn new() -> Self {
-        Obstacle {
-            hits: [None; 4],
-        }
+        Obstacle { hits: [None; 4] }
     }
 
     fn register_hit(&mut self, side: Side) -> bool {
@@ -184,17 +182,17 @@ impl Obstacle {
             match hit {
                 None => {
                     let _ = hit.insert(side);
-                    return false
+                    return false;
                 }
                 Some(prev_hit) => {
                     if *prev_hit == side {
-                        return true
+                        return true;
                     }
                 }
             }
-        };
+        }
 
-        panic!("This should not be possible!");
+        unreachable!()
     }
 }
 
@@ -203,16 +201,20 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut obstacles2 = [[false; MAX_Y_LENGTH]; MAX_X_LENGTH];
     let mut start_position: Option<Position> = None;
 
-    input.as_bytes().split(|byte| *byte == b'\n').enumerate().for_each(|(y_index, line)| {
-        line.iter().enumerate().for_each(|(x_index, byte)| {
-            if *byte == b'#' {
-                obstacles[y_index][x_index] = Some(Obstacle::new());
-                obstacles2[y_index][x_index] = true;
-            } else if start_position.is_none() && *byte == b'^' {
-                start_position = Some(Position::new(x_index, y_index, Heading::North));
-            }
+    input
+        .as_bytes()
+        .split(|byte| *byte == b'\n')
+        .enumerate()
+        .for_each(|(y_index, line)| {
+            line.iter().enumerate().for_each(|(x_index, byte)| {
+                if *byte == b'#' {
+                    obstacles[y_index][x_index] = Some(Obstacle::new());
+                    obstacles2[y_index][x_index] = true;
+                } else if start_position.is_none() && *byte == b'^' {
+                    start_position = Some(Position::new(x_index, y_index, Heading::North));
+                }
+            });
         });
-    });
 
     let mut possible_positions = HashSet::new();
     let mut current_position = start_position.unwrap();
@@ -237,7 +239,8 @@ pub fn part_two(input: &str) -> Option<u32> {
             for (y, x) in chunk {
                 let mut current_position = start_position.unwrap();
 
-                if (y == current_position.y && x == current_position.x) || obstacles[y][x].is_some() {
+                if (y == current_position.y && x == current_position.x) || obstacles[y][x].is_some()
+                {
                     continue;
                 }
 

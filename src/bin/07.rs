@@ -1,40 +1,46 @@
-use std::str::FromStr;
 use itertools::Itertools;
 use rayon::prelude::*;
+use std::str::FromStr;
 
 advent_of_code::solution!(7);
 
 type InputIterator<'a> = rayon::iter::Map<rayon::str::Lines<'a>, fn(&str) -> (u64, Vec<u64>)>;
 
 fn setup(input: &str) -> InputIterator {
-    input
-        .par_lines()
-        .map(|line| {
-            let mut split_line = line
-                .split(":");
+    input.par_lines().map(|line| {
+        let mut split_line = line.split(":");
 
-            let result = split_line.next().map(u64::from_str).unwrap().unwrap();
-            let values = split_line.next().unwrap().split_ascii_whitespace().flat_map(u64::from_str).collect_vec();
+        let result = split_line.next().map(u64::from_str).unwrap().unwrap();
+        let values = split_line
+            .next()
+            .unwrap()
+            .split_ascii_whitespace()
+            .flat_map(u64::from_str)
+            .collect_vec();
 
-            (result, values)
-        })
+        (result, values)
+    })
 }
 
 fn is_equation_valid_pt1((result, values): (u64, Vec<u64>)) -> Option<u64> {
     for mut i in 0..2u32.pow((values.len() - 1) as u32) {
-        let calculated_result = values.iter().copied().reduce(|acc, value| {
-            let acc = match i & 1 {
-                0 => acc + value,
-                1 => acc * value,
-                _ => unreachable!()
-            };
+        let calculated_result = values
+            .iter()
+            .copied()
+            .reduce(|acc, value| {
+                let acc = match i & 1 {
+                    0 => acc + value,
+                    1 => acc * value,
+                    _ => unreachable!(),
+                };
 
-            i >>= 1;
-            acc
-        }).unwrap();
+                i >>= 1;
+                acc
+            })
+            .unwrap();
 
         if result == calculated_result {
-            return Some(result)
+            return Some(result);
         }
     }
 
@@ -42,9 +48,7 @@ fn is_equation_valid_pt1((result, values): (u64, Vec<u64>)) -> Option<u64> {
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
-    let sum = setup(input)
-        .filter_map(is_equation_valid_pt1)
-        .sum();
+    let sum = setup(input).filter_map(is_equation_valid_pt1).sum();
 
     Some(sum)
 }
@@ -53,15 +57,15 @@ fn num_digits(n: u64) -> u32 {
     if n == 0 {
         return 1;
     }
-    
+
     let mut count = 0;
     let mut temp = n;
-    
+
     while temp > 0 {
         temp /= 10;
         count += 1;
     }
-    
+
     count
 }
 
@@ -83,16 +87,16 @@ fn is_equation_valid_pt2((result, values): (u64, Vec<u64>)) -> Option<u64> {
                     let num_digits = num_digits(values[j + 1]);
                     calculated_result * 10u64.pow(num_digits) + values[j + 1]
                 }
-                _ => unreachable!()
+                _ => unreachable!(),
             };
-            
+
             if calculated_result > result {
-              break;  
+                break;
             }
         }
 
         if result == calculated_result {
-            return Some(result)
+            return Some(result);
         }
     }
 
@@ -100,9 +104,7 @@ fn is_equation_valid_pt2((result, values): (u64, Vec<u64>)) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let sum = setup(input)
-        .filter_map(is_equation_valid_pt2)
-        .sum();
+    let sum = setup(input).filter_map(is_equation_valid_pt2).sum();
 
     Some(sum)
 }

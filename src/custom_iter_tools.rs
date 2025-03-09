@@ -1,4 +1,4 @@
-use crate::custom_iter_tools::adaptors::zip_latest::{zip_latest, ZipLatest};
+use crate::custom_iter_tools::adaptors::zip_latest::{ZipLatest, zip_latest};
 
 mod adaptors;
 mod methods;

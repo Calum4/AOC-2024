@@ -298,7 +298,7 @@ mod tests {
                     total_nanos: 1_000_000_000_f64,
                 }],
             };
-            
+
             assert!(!timings.is_day_complete(day!(1)));
         }
 
