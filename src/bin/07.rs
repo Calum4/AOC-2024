@@ -1,5 +1,6 @@
 use std::str::FromStr;
 use itertools::Itertools;
+use rayon::prelude::*;
 
 advent_of_code::solution!(7);
 
@@ -26,7 +27,7 @@ fn is_equation_valid((result, values): (u64, Vec<u64>)) -> Option<u64> {
 
 pub fn part_one(input: &str) -> Option<u64> {
     let sum = input
-        .lines()
+        .par_lines()
         .map(|line| {
             let mut split_line = line
                 .split(":");

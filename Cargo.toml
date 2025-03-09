@@ -33,3 +33,4 @@ regex = { version = "1.11.1", features = [] }
 anyhow = { version = "1.0.93", features = [] }
 strum = { version = "0.27.1", features = ["derive"] }
 num-traits = { version = "0.2.19", features = [] }
+rayon = { version = "1.10.0", features = [] }
